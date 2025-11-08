@@ -1,385 +1,174 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Music Recommender — Interactive</title>
-    <style>
-        :root{
-            --accent:#1DB954;
-            --bg:#0f1720;
-            --card:#0b1220;
-            --muted:#9aa5a1;
-        }
-        body{
-            font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-            background: linear-gradient(180deg, #071018 0%, #08121a 100%);
-            color:#e6eef0;
-            margin:0; padding:28px;
-            display:flex; align-items:flex-start; justify-content:center;
-        }
-        .container{
-            width:980px;
-            max-width:96%;
-        }
-        header{ display:flex; align-items:center; gap:16px; margin-bottom:18px;}
-        .logo{
-            width:56px; height:56px; border-radius:12px; background:var(--accent); display:flex; align-items:center; justify-content:center; font-weight:700; color:#042014;
-            box-shadow: 0 6px 24px rgba(29,185,84,0.12);
-        }
-        h1{ font-size:20px; margin:0; }
-        p.lead{ color:var(--muted); margin:4px 0 0 0; font-size:0.95rem; }
-
-        .card{
-            background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-            border:1px solid rgba(255,255,255,0.04);
-            padding:18px; border-radius:12px; box-shadow: 0 8px 40px rgba(2,6,10,0.6);
-        }
-
-        form#search-form{ display:grid; grid-template-columns: 1fr 250px; gap:12px; align-items:center; }
-        .inputs{
-            display:flex; gap:8px;
-        }
-        .field{
-            position:relative; width:100%;
-        }
-        input[type="text"]{
-            width:100%; padding:12px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); background:transparent; color:inherit;
-            outline:none; font-size:0.95rem;
-        }
-        .controls{ display:flex; gap:8px; align-items:center; }
-        button.primary{
-            background:var(--accent); color:#042014; border:none; padding:12px 16px; border-radius:10px; font-weight:600; cursor:pointer;
-            box-shadow: 0 6px 18px rgba(29,185,84,0.12);
-        }
-        button.ghost{ background:transparent; color:var(--accent); border:1px solid rgba(255,255,255,0.04); padding:10px 12px; border-radius:10px; cursor:pointer; }
-
-        .suggestions{
-            position:absolute; top:44px; left:0; right:0; z-index:30;
-            background:rgba(6,10,14,0.92); border-radius:8px; border:1px solid rgba(255,255,255,0.03);
-            max-height:260px; overflow:auto; padding:6px;
-        }
-        .suggestion{
-            padding:8px 10px; border-radius:6px; cursor:pointer; display:flex; justify-content:space-between; gap:8px; align-items:center;
-        }
-        .suggestion:hover{ background:rgba(255,255,255,0.02); }
-
-        .results { margin-top:18px; display:grid; grid-template-columns: 1fr 360px; gap:14px; }
-        .left-col{ }
-        .right-col{ }
-
-        .recommendation {
-            background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-            padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.03); margin-bottom:10px;
-        }
-        .meta { color:var(--muted); font-size:0.9rem; margin-top:6px; }
-
-        .matches-list { margin-top:8px; display:flex; flex-direction:column; gap:8px; }
-
-        .spinner { display:inline-block; width:18px; height:18px; border-radius:50%; border:3px solid rgba(255,255,255,0.08); border-top-color:var(--accent); animation:spin 1s linear infinite;}
-        @keyframes spin { to { transform:rotate(360deg);} }
-        footer { color:var(--muted); margin-top:16px; font-size:0.85rem; text-align:center; }
-
-        @media (max-width:900px){
-            form#search-form{ grid-template-columns: 1fr; }
-            .results{ grid-template-columns: 1fr; }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Music Recommender</title>
+  <style>
+    body {
+      font-family: Inter, sans-serif;
+      background: #0d1117;
+      color: #f0f6fc;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 16px;
+    }
+    .container {
+      width: 900px;
+      max-width: 100%;
+    }
+    h1 {
+      text-align: center;
+      color: #58a6ff;
+      margin-bottom: 20px;
+    }
+    .search-box {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    input {
+      width: 100%;
+      padding: 14px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid #30363d;
+      background: #161b22;
+      color: #f0f6fc;
+      outline: none;
+    }
+    .suggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 4px;
+      z-index: 10;
+    }
+    .suggestion {
+      padding: 10px 14px;
+      cursor: pointer;
+      border-bottom: 1px solid #21262d;
+    }
+    .suggestion:hover, .suggestion.active {
+      background: #238636;
+    }
+    .results {
+      margin-top: 30px;
+    }
+    .selected {
+      background: #238636;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+    }
+    .recommendation {
+      background: #161b22;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #30363d;
+    }
+    .meta {
+      color: #8b949e;
+      font-size: 0.9rem;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="logo">MR</div>
-            <div>
-                <h1>Music Recommender</h1>
-                <p class="lead">Type a title or artist — suggestions appear while you type. Choose a match and get similar tracks.</p>
-            </div>
-        </header>
-
-        <div class="card">
-            <form id="search-form" onsubmit="return false;">
-                <div>
-                    <div style="display:flex; gap:8px; margin-bottom:8px;">
-                        <label style="display:flex; gap:6px; align-items:center;">
-                            <input type="radio" name="mode" value="both" checked> Title & Artist
-                        </label>
-                        <label style="display:flex; gap:6px; align-items:center;">
-                            <input type="radio" name="mode" value="title"> Title only
-                        </label>
-                        <label style="display:flex; gap:6px; align-items:center;">
-                            <input type="radio" name="mode" value="artist"> Artist only
-                        </label>
-                    </div>
-
-                    <div class="inputs">
-                        <div class="field" style="flex:1;">
-                            <input id="title-input" type="text" placeholder="Type song title..." autocomplete="off">
-                            <div id="title-suggestions" class="suggestions" style="display:none;"></div>
-                        </div>
-
-                        <div class="field" style="width:320px;">
-                            <input id="artist-input" type="text" placeholder="Type artist..." autocomplete="off">
-                            <div id="artist-suggestions" class="suggestions" style="display:none;"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="controls">
-                    <button id="search-btn" class="primary">Find recommendations</button>
-                    <button id="clear-btn" class="ghost" type="button">Clear</button>
-                </div>
-            </form>
-
-            <div id="status" style="margin-top:12px; color:var(--muted)">Tip: you can type "Title - Artist" in the main field to search both at once.</div>
-        </div>
-
-        <div class="results">
-            <div class="left-col">
-                <div id="matches-area" class="card" style="margin-top:12px; display:none;">
-                    <h3 style="margin-top:0;">Did you mean...</h3>
-                    <div id="matches-list" class="matches-list"></div>
-                </div>
-
-                <div id="recs-area" class="card" style="margin-top:12px; display:none;">
-                    <h3 style="margin-top:0;">Recommendations</h3>
-                    <div id="recs-list"></div>
-                </div>
-            </div>
-
-            <div class="right-col">
-                <div class="card">
-                    <h4 style="margin:0 0 8px 0;">Selected</h4>
-                    <div id="selected-info" class="meta">No selection yet.</div>
-                    <div style="margin-top:12px;">
-                        <button id="get-recs-btn" class="primary" style="width:100%;">Get recommendations for selected</button>
-                    </div>
-                </div>
-
-                <div class="card" style="margin-top:12px;">
-                    <h4 style="margin:0 0 8px 0;">Tips</h4>
-                    <p class="meta">Use the suggestions dropdown to quickly pick the exact song. If ambiguous, choose from the list that appears.</p>
-                </div>
-            </div>
-        </div>
-
-        <footer>Built with your local embeddings • Make sure server has access to <code>embeddings.npy</code> and <code>song_metadata.parquet</code></footer>
+  <div class="container">
+    <h1>Music Recommender</h1>
+    <div class="search-box">
+      <input id="search" type="text" placeholder="Cerca una canzone o un artista...">
+      <div id="suggestions" class="suggestions" style="display:none;"></div>
     </div>
 
-<script>
-const titleInput = document.getElementById('title-input');
-const artistInput = document.getElementById('artist-input');
-const titleSug = document.getElementById('title-suggestions');
-const artistSug = document.getElementById('artist-suggestions');
-const modeRadios = document.getElementsByName('mode');
+    <div id="selected-song" class="selected" style="display:none;"></div>
 
-const matchesArea = document.getElementById('matches-area');
-const matchesList = document.getElementById('matches-list');
-const recsArea = document.getElementById('recs-area');
-const recsList = document.getElementById('recs-list');
-const selectedInfo = document.getElementById('selected-info');
+    <div id="recommendations" class="results"></div>
+  </div>
 
-let selectedIndex = null; // original dataset index for the selected song
+  <script>
+    const search = document.getElementById('search');
+    const suggestionsBox = document.getElementById('suggestions');
+    const recsDiv = document.getElementById('recommendations');
+    const selectedDiv = document.getElementById('selected-song');
+    let currentSuggestions = [];
 
-function getMode(){ for(const r of modeRadios) if(r.checked) return r.value; return 'both'; }
-
-// Debounce helper
-function debounce(fn, ms=200){
-    let t;
-    return (...args)=>{ clearTimeout(t); t = setTimeout(()=>fn(...args), ms); }
-}
-
-// fetch suggestions from backend
-async function fetchSuggestions(q, type='both'){
-    if(!q || q.trim().length < 1) return [];
-    try{
-        const res = await fetch(`/suggest?q=${encodeURIComponent(q)}&type=${type}&limit=8`);
-        if(!res.ok) return [];
-        return await res.json();
-    }catch(e){ return []; }
-}
-
-function renderSuggestionList(container, suggestions){
-    container.innerHTML = '';
-    if(!suggestions || suggestions.length === 0){ container.style.display='none'; return; }
-    for(const s of suggestions){
-        const el = document.createElement('div');
-        el.className = 'suggestion';
-        el.innerHTML = `<div><strong>${escapeHtml(s.track_name)}</strong><div style="color:var(--muted); font-size:0.9rem">${escapeHtml(s.artist_name)}</div></div>
-                        <div style="color:var(--muted); font-size:0.9rem">#${s.index}</div>`;
-        el.addEventListener('click', ()=>{
-            // populate inputs and set selection
-            titleInput.value = s.track_name;
-            artistInput.value = s.artist_name;
-            selectedIndex = s.index;
-            selectedInfo.innerHTML = `<strong>${escapeHtml(s.track_name)}</strong><div class="meta">${escapeHtml(s.artist_name)}</div>`;
-            hideAllSuggestions();
-            matchesArea.style.display='none';
-            recsArea.style.display='none';
-        });
-        container.appendChild(el);
+    async function fetchSuggestions(q) {
+      const res = await fetch(`/suggest?q=${encodeURIComponent(q)}`);
+      return res.ok ? res.json() : [];
     }
-    container.style.display = 'block';
-}
 
-function hideAllSuggestions(){
-    titleSug.style.display='none';
-    artistSug.style.display='none';
-}
+    async function fetchRecommendations(index) {
+      const res = await fetch('/recommend', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({index})
+      });
+      return res.ok ? res.json() : null;
+    }
 
-// wire inputs with suggestions
-titleInput.addEventListener('input', debounce(async ()=>{
-    const q = titleInput.value;
-    const mode = getMode();
-    const type = (mode === 'artist') ? 'artist' : 'title';
-    const suggestions = await fetchSuggestions(q, type);
-    renderSuggestionList(titleSug, suggestions);
-}, 180));
-
-artistInput.addEventListener('input', debounce(async ()=>{
-    const q = artistInput.value;
-    const mode = getMode();
-    const type = (mode === 'title') ? 'title' : 'artist';
-    const suggestions = await fetchSuggestions(q, type);
-    renderSuggestionList(artistSug, suggestions);
-}, 180));
-
-// clear button
-document.getElementById('clear-btn').addEventListener('click', ()=>{
-    titleInput.value=''; artistInput.value=''; selectedIndex=null; selectedInfo.innerHTML='No selection yet.';
-    hideAllSuggestions();
-    matchesArea.style.display='none'; recsArea.style.display='none';
-});
-
-// Search button: call /recommend
-document.getElementById('search-btn').addEventListener('click', async ()=>{
-    matchesArea.style.display='none';
-    recsArea.style.display='none';
-    const mode = getMode();
-
-    // Prefer using selectedIndex if user picked suggestion
-    if(selectedIndex !== null){
-        await fetchRecommendations({index: selectedIndex});
+    search.addEventListener('input', async () => {
+      const q = search.value.trim();
+      if (q.length < 2) {
+        suggestionsBox.style.display = 'none';
         return;
-    }
+      }
+      const data = await fetchSuggestions(q);
+      currentSuggestions = data;
+      renderSuggestions(data);
+    });
 
-    // Otherwise use the typed inputs
-    const title = titleInput.value.trim();
-    const artist = artistInput.value.trim();
-
-    // if both empty, do nothing
-    if(!title && !artist){
-        alert('Enter a title and/or an artist to search.');
+    function renderSuggestions(list) {
+      suggestionsBox.innerHTML = '';
+      if (list.length === 0) {
+        suggestionsBox.style.display = 'none';
         return;
-    }
-
-    // Try exact mode first to get direct recommendations if unique; otherwise server will return ambiguous matches
-    try{
-        setStatus('Searching...', true);
-        const payload = { title, artist, mode: 'exact' };
-        const res = await fetch('/recommend', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-        const data = await res.json();
-        if(data.status === 'success'){
-            renderRecommendations(data.recommendations);
-        }else if(data.status === 'ambiguous'){
-            // show matches to choose
-            renderMatches(data.matches);
-        }else{
-            alert(data.message || 'No results.');
-        }
-    }catch(err){
-        alert('Error: ' + err.message);
-    }finally{
-        setStatus('', false);
-    }
-});
-
-// If user wants to request recs for the currently selected match
-document.getElementById('get-recs-btn').addEventListener('click', async ()=>{
-    if(selectedIndex === null){ alert('Select a song first (click a suggestion).'); return; }
-    await fetchRecommendations({index: selectedIndex});
-});
-
-// Render ambiguous matches so user can pick one
-function renderMatches(matches){
-    matchesList.innerHTML = '';
-    if(!matches || matches.length === 0){ matchesArea.style.display='none'; return; }
-    matches.forEach(m => {
+      }
+      list.forEach((item, i) => {
         const div = document.createElement('div');
         div.className = 'suggestion';
-        div.innerHTML = `<div><strong>${escapeHtml(m.track_name)}</strong><div class="meta">${escapeHtml(m.artist_name)}</div></div>
-                         <div style="color:var(--muted)"><button class="ghost" style="background:none; border:none; color:var(--accent); cursor:pointer;">Select</button></div>`;
-        div.querySelector('button').addEventListener('click', ()=>{
-            selectedIndex = m.index;
-            titleInput.value = m.track_name;
-            artistInput.value = m.artist_name;
-            selectedInfo.innerHTML = `<strong>${escapeHtml(m.track_name)}</strong><div class="meta">${escapeHtml(m.artist_name)}</div>`;
-            matchesArea.style.display='none';
-            fetchRecommendations({index: selectedIndex});
-        });
-        matchesList.appendChild(div);
-    });
-    matchesArea.style.display='block';
-}
-
-// Call recommend endpoint and show recs
-async function fetchRecommendations(payload){
-    setStatus('Computing recommendations...', true);
-    try{
-        const res = await fetch('/recommend', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-        const data = await res.json();
-        if(data.status === 'success'){
-            renderRecommendations(data.recommendations);
-        } else if(data.status === 'ambiguous'){
-            renderMatches(data.matches);
-        } else {
-            alert(data.message || 'No recommendations found.');
-        }
-    }catch(err){
-        alert('Error: ' + err.message);
-    }finally{
-        setStatus('', false);
+        div.innerHTML = `<strong>${item.track_name}</strong><br><span class="meta">${item.artist_name}</span>`;
+        div.addEventListener('click', () => handleSelection(item, div));
+        suggestionsBox.appendChild(div);
+      });
+      suggestionsBox.style.display = 'block';
     }
-}
 
-function renderRecommendations(list){
-    recsList.innerHTML = '';
-    if(!list || list.length === 0){ recsList.innerHTML = '<div class="meta">No recommendations found.</div>'; recsArea.style.display='block'; return; }
-    list.forEach(item=>{
-        const card = document.createElement('div');
-        card.className = 'recommendation';
-        const simPercent = (item.similarity * 100).toFixed(1);
-        card.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center;">
-                                <div>
-                                    <strong>${escapeHtml(item.track_name)}</strong>
-                                    <div class="meta">${escapeHtml(item.artist_name)}</div>
-                                </div>
-                                <div style="text-align:right;">
-                                    <div style="font-weight:700; color:var(--accent)">${simPercent}%</div>
-                                    <div class="meta" style="margin-top:6px">${escapeHtml(item.genres)}</div>
-                                </div>
-                          </div>`;
-        recsList.appendChild(card);
+    async function handleSelection(item, element) {
+      suggestionsBox.style.display = 'none';
+      search.value = `${item.track_name} - ${item.artist_name}`;
+      document.querySelectorAll('.suggestion').forEach(el => el.classList.remove('active'));
+      element?.classList.add('active');
+
+      const data = await fetchRecommendations(item.index);
+      if (!data || data.status !== 'success') return;
+
+      selectedDiv.style.display = 'block';
+      selectedDiv.innerHTML = `<h3>${data.selected.track_name}</h3><div class="meta">${data.selected.artist_name}</div>`;
+
+      recsDiv.innerHTML = '';
+      data.recommendations.forEach(rec => {
+        const div = document.createElement('div');
+        div.className = 'recommendation';
+        div.innerHTML = `<strong>${rec.track_name}</strong><div class="meta">${rec.artist_name}<br>${rec.genres} • Similarità ${(rec.similarity*100).toFixed(1)}%</div>`;
+        recsDiv.appendChild(div);
+      });
+    }
+
+    // Chiude suggerimenti cliccando fuori
+    document.addEventListener('click', (e)=>{
+      if (!suggestionsBox.contains(e.target) && e.target !== search) {
+        suggestionsBox.style.display = 'none';
+      }
     });
-    recsArea.style.display='block';
-    // scroll into view
-    recsArea.scrollIntoView({behavior:'smooth', block:'start'});
-}
-
-function setStatus(txt, busy=false){
-    const s = document.getElementById('status');
-    s.innerHTML = busy ? `<span class="spinner"></span> ${escapeHtml(txt)}` : escapeHtml(txt);
-}
-
-function escapeHtml(str){
-    if(!str) return '';
-    return str.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
-}
-
-// Hide suggestions when clicking outside
-document.addEventListener('click', (e)=>{
-    if(!titleInput.contains(e.target) && !titleSug.contains(e.target)) titleSug.style.display='none';
-    if(!artistInput.contains(e.target) && !artistSug.contains(e.target)) artistSug.style.display='none';
-});
-</script>
+  </script>
 </body>
 </html>
