@@ -1,6 +1,6 @@
 SongVibeRecommender 🎵
 
-This project is a music recommendation web app built with Python, scikit-learn, and Flask. Unlike recommenders that focus on genre or artist, this tool finds songs that share a similar "vibe" by analyzing their raw audio features.
+This project is a music recommendation web app built with Python, scikit-learn, and Flask. Unlike recommenders that focus only on genre or artist, this tool finds songs that share a similar "vibe" by analyzing their audio features.
 
 The entire process is detailed in my Medium article.
 
