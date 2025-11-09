@@ -5,7 +5,7 @@ from flask import Flask, request, jsonify, render_template
 from sklearn.metrics.pairwise import cosine_similarity
 from flask_cors import CORS
 
-app = Flask(__name__, template_folder=".")
+app = Flask(__name__, template_folder="templates")
 CORS(app)  
 
 # === Load data ===
