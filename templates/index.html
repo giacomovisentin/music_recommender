@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Music Recommender</title>
   <style>
+    /* I CSS sono stati mantenuti dalla tua versione 'bella' */
     :root {
       --bg-color: #121212;
       --card-color: #181818;
@@ -45,7 +46,7 @@
       width: 100%;
       padding: 14px 18px;
       font-size: 1rem;
-      border-radius: 50px; /* Rounded search bar */
+      border-radius: 50px;
       border: 1px solid transparent;
       background: var(--hover-color);
       color: var(--text-color);
@@ -138,7 +139,6 @@
     /* Recommendations */
     #recommendations {
       display: grid;
-      /* Responsive grid: fills with cards ~180px wide */
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
       gap: 16px;
     }
@@ -168,7 +168,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      display: block; /* for ellipsis */
+      display: block;
     }
     .rec-card .artist-name {
       font-size: 0.9rem;
@@ -176,7 +176,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      display: block; /* for ellipsis */
+      display: block;
       margin-bottom: 12px;
     }
     .spotify-link {
@@ -227,23 +227,26 @@
   </div>
 
   <script>
+    // Configurazione dell'URL base di Spotify per il link alla traccia
+    const SPOTIFY_BASE_URL = "https://open.spotify.com/track/";
+    const API_URL = ''; // Usiamo un percorso relativo per Flask (es. /suggest)
+
     const search = document.getElementById('search');
     const suggestionsBox = document.getElementById('suggestions');
     const recsDiv = document.getElementById('recommendations');
     const recsTitle = document.getElementById('rec-title');
     const selectedDiv = document.getElementById('selected-song');
-    let currentSuggestions = [];
     
     // Icon template
     const musicIcon = `<div class="album-placeholder"><svg><use href="#music-note"></use></svg></div>`;
 
     async function fetchSuggestions(q) {
-      const res = await fetch(`/suggest?q=${encodeURIComponent(q)}`);
+      const res = await fetch(`${API_URL}/suggest?q=${encodeURIComponent(q)}`);
       return res.ok ? res.json() : [];
     }
 
     async function fetchRecommendations(index) {
-      const res = await fetch('/recommend', {
+      const res = await fetch(`${API_URL}/recommend`, {
         method: 'POST',
         headers: {'Content-Type':'application/json'},
         body: JSON.stringify({index})
@@ -258,7 +261,6 @@
         return;
       }
       const data = await fetchSuggestions(q);
-      currentSuggestions = data;
       renderSuggestions(data);
     });
 
@@ -268,10 +270,10 @@
         suggestionsBox.style.display = 'none';
         return;
       }
-      list.forEach((item, i) => {
+      list.forEach((item) => {
         const div = document.createElement('div');
         div.className = 'suggestion';
-        // Add placeholder icon to suggestions
+        
         div.innerHTML = `
           ${musicIcon}
           <div>
@@ -289,18 +291,16 @@
       suggestionsBox.style.display = 'none';
       search.value = `${item.track_name} - ${item.artist_name}`;
       
-      recsDiv.innerHTML = '<div class="meta" style="text-align:center;">Loading...</div>'; // Loading state
+      recsDiv.innerHTML = '<div class="meta" style="text-align:center;">Caricamento...</div>';
       selectedDiv.style.display = 'none';
       recsTitle.style.display = 'none';
 
       const data = await fetchRecommendations(item.index);
       if (!data || data.status !== 'success') {
-        recsDiv.innerHTML = '<div class="meta" style="text-align:center; color: #ff4d4d;">Error loading recommendations.</div>';
+        recsDiv.innerHTML = '<div class="meta" style="text-align:center; color: #ff4d4d;">Errore nel caricamento delle raccomandazioni.</div>';
         return;
       }
       
-      const spotifyBaseUrl = "https://open.spotify.com/track/";
-
       // Render selected song card
       selectedDiv.style.display = 'flex';
       selectedDiv.innerHTML = `
@@ -311,7 +311,7 @@
           <h3>${data.selected.track_name}</h3>
           <div class="meta">${data.selected.artist_name}</div>
         </div>
-        <a href="${spotifyBaseUrl}${data.selected.track_id}" target="_blank" class="spotify-link">Listen</a>
+        <a href="${SPOTIFY_BASE_URL}${data.selected.track_id}" target="_blank" class="spotify-link">Ascolta</a>
       `;
 
       // Render recommendation cards
@@ -326,8 +326,8 @@
           </div>
           <span class="track-name">${rec.track_name}</span>
           <span class="artist-name">${rec.artist_name}</span>
-          <a href="${spotifyBaseUrl}${rec.track_id}" target="_blank" class="spotify-link">Listen</a>
-          <div class="similarity">${(rec.similarity*100).toFixed(0)}% Similar</div>
+          <a href="${SPOTIFY_BASE_URL}${rec.track_id}" target="_blank" class="spotify-link">Ascolta</a>
+          <div class="similarity">${(rec.similarity*100).toFixed(0)}% Simile</div>
         `;
         recsDiv.appendChild(div);
       });
@@ -335,7 +335,7 @@
 
     // Close suggestions when clicking outside
     document.addEventListener('click', (e)=>{
-      if (!suggestionsBox.contains(e.target) && e.target !== search) {
+      if (!search.contains(e.target) && !suggestionsBox.contains(e.target)) {
         suggestionsBox.style.display = 'none';
       }
     });
