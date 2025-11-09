@@ -1,27 +1,31 @@
+"""
+FILE 2: 2_app.py
+Server Flask per l'API di raccomandazione.
+Assicurati che 'embeddings.npy' e 'song_metadata.parquet' siano nella stessa cartella.
+"""
+
 import os
 import numpy as np
 import pandas as pd
 from flask import Flask, request, jsonify, render_template
 from sklearn.metrics.pairwise import cosine_similarity
+from flask_cors import CORS
 
-app = Flask(__name__, template_folder="templates")
+app = Flask(__name__, template_folder=".")
+CORS(app)  # Abilita CORS per richieste da file://
 
 # === Load data ===
 EMB_PATH = "embeddings.npy"
 META_PATH = "song_metadata.parquet"
 
 if not os.path.exists(EMB_PATH):
-    raise FileNotFoundError(f"Missing {EMB_PATH}")
+    raise FileNotFoundError(f"Missing {EMB_PATH}. Run '1_create_data.py' first.")
 if not os.path.exists(META_PATH):
-    raise FileNotFoundError(f"Missing {META_PATH}")
+    raise FileNotFoundError(f"Missing {META_PATH}. Run '1_create_data.py' first.")
 
 emb = np.load(EMB_PATH)
 X = pd.read_parquet(META_PATH).reset_index(drop=True)
 GENRE_COLS = [c for c in X.columns if c.startswith("genre_")]
-
-# Check for track_id, essential for Spotify links
-if "track_id" not in X.columns:
-    raise ValueError("FATAL: 'track_id' not found in song_metadata.parquet. Please re-run data saving script.")
 
 # Lowercase columns for quick substring search
 X["_track_lower"] = X["track_name"].fillna("").str.lower()
@@ -29,7 +33,8 @@ X["_artist_lower"] = X["artist_name"].fillna("").str.lower()
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    # Serve il file HTML direttamente
+    return render_template("3_index.html")
 
 @app.route("/suggest")
 def suggest():
@@ -43,7 +48,7 @@ def suggest():
     results = [
         {
             "index": int(i),
-            "track_id": r["track_id"], # Send track_id
+            "track_id": r["track_id"],  # *** AGGIUNTO track_id ***
             "track_name": r["track_name"],
             "artist_name": r["artist_name"]
         }
@@ -70,16 +75,16 @@ def recommend():
 
     recs["genres"] = recs.apply(extract_genres, axis=1)
 
-    # Send track_id for recommendations
+    # *** MODIFICATO per includere track_id ***
     results = recs[["track_id", "track_name", "artist_name", "genres", "similarity"]].to_dict(orient="records")
     
-    selected_row = X.loc[idx]
     selected = {
-        "track_id": selected_row["track_id"], # Send track_id for selected song
-        "track_name": selected_row["track_name"],
-        "artist_name": selected_row["artist_name"]
+        "track_id": X.loc[idx, "track_id"], # *** AGGIUNTO track_id ***
+        "track_name": X.loc[idx, "track_name"],
+        "artist_name": X.loc[idx, "artist_name"]
     }
     return jsonify({"status": "success", "selected": selected, "recommendations": results})
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    print("Server avviato. Vai su http://127.0.0.1:5000/ per usare l'app.")
+    app.run(host="0.0.0.0", port=5000, debug=False)
