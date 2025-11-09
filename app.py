@@ -1,9 +1,3 @@
-"""
-FILE 2: 2_app.py
-Server Flask per l'API di raccomandazione.
-Assicurati che 'embeddings.npy' e 'song_metadata.parquet' siano nella stessa cartella.
-"""
-
 import os
 import numpy as np
 import pandas as pd
@@ -12,16 +6,11 @@ from sklearn.metrics.pairwise import cosine_similarity
 from flask_cors import CORS
 
 app = Flask(__name__, template_folder=".")
-CORS(app)  # Abilita CORS per richieste da file://
+CORS(app)  
 
 # === Load data ===
 EMB_PATH = "embeddings.npy"
 META_PATH = "song_metadata.parquet"
-
-if not os.path.exists(EMB_PATH):
-    raise FileNotFoundError(f"Missing {EMB_PATH}. Run '1_create_data.py' first.")
-if not os.path.exists(META_PATH):
-    raise FileNotFoundError(f"Missing {META_PATH}. Run '1_create_data.py' first.")
 
 emb = np.load(EMB_PATH)
 X = pd.read_parquet(META_PATH).reset_index(drop=True)
@@ -33,8 +22,7 @@ X["_artist_lower"] = X["artist_name"].fillna("").str.lower()
 
 @app.route("/")
 def index():
-    # Serve il file HTML direttamente
-    return render_template("3_index.html")
+    return render_template("index.html")
 
 @app.route("/suggest")
 def suggest():
@@ -48,7 +36,7 @@ def suggest():
     results = [
         {
             "index": int(i),
-            "track_id": r["track_id"],  # *** AGGIUNTO track_id ***
+            "track_id": r["track_id"], 
             "track_name": r["track_name"],
             "artist_name": r["artist_name"]
         }
@@ -75,16 +63,15 @@ def recommend():
 
     recs["genres"] = recs.apply(extract_genres, axis=1)
 
-    # *** MODIFICATO per includere track_id ***
     results = recs[["track_id", "track_name", "artist_name", "genres", "similarity"]].to_dict(orient="records")
     
     selected = {
-        "track_id": X.loc[idx, "track_id"], # *** AGGIUNTO track_id ***
+        "track_id": X.loc[idx, "track_id"], 
         "track_name": X.loc[idx, "track_name"],
         "artist_name": X.loc[idx, "artist_name"]
     }
     return jsonify({"status": "success", "selected": selected, "recommendations": results})
 
 if __name__ == "__main__":
-    print("Server avviato. Vai su http://127.0.0.1:5000/ per usare l'app.")
+    print("Server Started. Go to http://127.0.0.1:5000/ to use the app.")
     app.run(host="0.0.0.0", port=5000, debug=False)

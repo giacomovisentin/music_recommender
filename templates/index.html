@@ -170,7 +170,7 @@
   <div class="container">
     <h1>Music Recommender</h1>
     <div class="search-box">
-      <input id="search" type="text" placeholder="Cerca una canzone o un artista...">
+      <input id="search" type="text" placeholder="Search for a song or an artist...">
       <div id="suggestions" class="suggestions" style="display:none;"></div>
     </div>
 
@@ -187,8 +187,6 @@
     const recsTitle = document.getElementById('rec-title');
     const selectedDiv = document.getElementById('selected-song');
     let currentSuggestions = [];
-    
-    // Constante icona rimossa
 
     async function fetchSuggestions(q) {
       const res = await fetch(`/suggest?q=${encodeURIComponent(q)}`);
@@ -263,7 +261,7 @@
         <a href="${spotifyBaseUrl}${data.selected.track_id}" target="_blank" class="spotify-link">Listen</a>
       `;
 
-      // Render recommendation cards (icona rimossa)
+      // Render recommendation cards 
       recsTitle.style.display = 'block';
       recsDiv.innerHTML = '';
       data.recommendations.forEach(rec => {
